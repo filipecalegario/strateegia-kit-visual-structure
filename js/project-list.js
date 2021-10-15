@@ -3,6 +3,100 @@ let questions = [];
 let preRows = [];
 let postRows = [];
 
+let doPitch_mission_id = "616828b5c435b002781956b2";
+let questions_doPitch = [];
+
+function tabulateDoPitch() {
+
+}
+
+function getAllKits_doPitch(missionId) {
+    let fetches = [];
+    questions_doPitch = [];
+    getAllContentsByMissionId(access_token, missionId).then(mission => {
+        let kits = [];
+        mission.content.forEach(content => {
+            kits.push({ id: content.id, title: content.kit.title });
+        });
+        return kits;
+    }).then(kits => {
+        //iterate over kits
+        kits.forEach(kit => {
+            fetches.push(getContentById(access_token, kit.id).then(content => {
+                console.log("content:");
+                console.log(content);
+                content.kit.questions.forEach(question => {
+                    questions_doPitch.push({ question_id: question.id, question: question.question, kit: content.kit.title, content_id: content.id });
+                });
+            }));
+        });
+        Promise.all(fetches).then(input => {
+            console.log("questions:");
+            console.log(questions_doPitch);
+            buildComments_doPitch();
+        });
+    }
+    );
+}
+
+function buildComments_doPitch() {
+    preRows = [];
+    let fetches = [];
+    //get user_id from local storage
+    let user_id = localStorage.getItem("user_id");
+    questions_doPitch.forEach(question => {
+        fetches.push(getParentComments(access_token, question.content_id, question.question_id).then(comments => {
+            console.log(comments.content);
+            comments.content.forEach(comment => {
+                let question_text = questions_doPitch.find(q => q.question_id == comment.question_id).question;
+                let row = {
+                    "id": comment.id,
+                    "question_id": comment.question_id,
+                    "question": question_text,
+                    "author_id": comment.author.id,
+                    "author": comment.author.name,
+                    "comment": comment.text,
+                };
+                //row[question_text] = comment.text;
+                if (row.author_id == user_id) {
+                    preRows.push(row);
+                }
+            });
+        }));
+    });
+    Promise.all(fetches).then(() => {
+        console.log("preRows:");
+        console.log(preRows);
+        postRows = [];
+        //get user_id from local storage
+        let user_id = localStorage.getItem("user_id");
+        questions.forEach(question => {
+            let foundRow = preRows.find(row => row.author_id == user_id && row.question_id == question.id);
+            if (foundRow != undefined) {
+                let currentD = postRows.find(d => d.author == user.name);
+                if (currentD == undefined) {
+                    const newLocal = {
+                        "id": foundRow.id,
+                        "author": user.name,
+                    };
+                    newLocal[question.question] = foundRow.comment;
+                    postRows.push(newLocal);
+                } else {
+                    currentD[question.question] = foundRow.comment;
+                }
+            }
+        });
+
+        let random_part = Math.floor(Math.random() * postRows.length);
+        let columns = ["author"].concat(questions.map(q => q.question));
+        columns = columns.map(c => {
+            // const newId = `${c}_${random_part}`;
+            const newId = `${c}`;
+            return { "id": newId, "label": c }
+        });
+    });
+}
+
 function initializeProjectList() {
     getAllProjects(access_token).then(labs => {
         console.log("getAllProjects()");
@@ -50,6 +144,9 @@ function initializeProjectList() {
 }
 
 function updateMapList(selected_project) {
+    // print selected project
+    console.log("selected_project:");
+    console.log(selected_project);
     users = [];
     getProjectById(access_token, selected_project).then(project => {
         project.users.forEach(element => {
@@ -108,6 +205,8 @@ function updateKitList(selected_mission) {
         setSelectedKit(initialSelectedKit);
     });
 }
+
+
 
 function setSelectedKit(kit_id) {
     localStorage.setItem("selected_kit", kit_id);
@@ -209,7 +308,7 @@ function tabulate(output_rows, columns) {
     let cells_ = rows_2.selectAll('td')
         .data(function (row) {
             let columns_map = columns.map(function (column) {
-                let random_part = Math.floor(Math.random()*100000);
+                let random_part = Math.floor(Math.random() * 100000);
                 let newId = `${row["id"]}_${random_part}`;
                 return { id: newId, column: column.label, value: row[column.label] };
             });
