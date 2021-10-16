@@ -68,8 +68,19 @@ function buildComments_doPitch() {
         //get user_id from local storage
         let user_id = localStorage.getItem("user_id");
         preRows.forEach(row => {
-            row[row.question] = row.comment;
-            postRows.push(row);
+            // row[row.question] = row.comment;
+            // postRows.push(row);
+            let currentD = postRows.find(d => d.author == row.author);
+            if (currentD == undefined) {
+                const newLocal = {
+                    "id": row.id,
+                    "author": row.author,
+                };
+                newLocal[row.question] = row.comment;
+                postRows.push(newLocal);
+            } else {
+                currentD[row.question] = row.comment;
+            }
         });
 
         let random_part = Math.floor(Math.random() * postRows.length);
