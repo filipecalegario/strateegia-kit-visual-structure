@@ -3,12 +3,8 @@ let questions = [];
 let preRows = [];
 let postRows = [];
 
-let doPitch_mission_id = "616828b5c435b002781956b2";
+
 let questions_doPitch = [];
-
-function tabulateDoPitch() {
-
-}
 
 function getAllKits_doPitch(missionId) {
     let fetches = [];
@@ -56,6 +52,7 @@ function buildComments_doPitch() {
                     "author_id": comment.author.id,
                     "author": comment.author.name,
                     "comment": comment.text,
+                    "kit": question_text.kit
                 };
                 //row[question_text] = comment.text;
                 if (row.author_id == user_id) {
@@ -70,30 +67,19 @@ function buildComments_doPitch() {
         postRows = [];
         //get user_id from local storage
         let user_id = localStorage.getItem("user_id");
-        questions.forEach(question => {
-            let foundRow = preRows.find(row => row.author_id == user_id && row.question_id == question.id);
-            if (foundRow != undefined) {
-                let currentD = postRows.find(d => d.author == user.name);
-                if (currentD == undefined) {
-                    const newLocal = {
-                        "id": foundRow.id,
-                        "author": user.name,
-                    };
-                    newLocal[question.question] = foundRow.comment;
-                    postRows.push(newLocal);
-                } else {
-                    currentD[question.question] = foundRow.comment;
-                }
-            }
+        preRows.forEach(row => {
+            row[row.question] = row.comment;
+            postRows.push(row);
         });
 
         let random_part = Math.floor(Math.random() * postRows.length);
-        let columns = ["author"].concat(questions.map(q => q.question));
+        let columns = ["author"].concat(questions_doPitch.map(q => q.question));
         columns = columns.map(c => {
             // const newId = `${c}_${random_part}`;
             const newId = `${c}`;
             return { "id": newId, "label": c }
         });
+        tabulate(postRows, columns);
     });
 }
 
@@ -206,8 +192,6 @@ function updateKitList(selected_mission) {
     });
 }
 
-
-
 function setSelectedKit(kit_id) {
     localStorage.setItem("selected_kit", kit_id);
     buildContentStructure(localStorage.getItem("selected_kit"));
@@ -312,7 +296,7 @@ function tabulate(output_rows, columns) {
                 let newId = `${row["id"]}_${random_part}`;
                 return { id: newId, column: column.label, value: row[column.label] };
             });
-            console.log(columns_map);
+            //console.log(columns_map);
             return columns_map;
         }, d => d.id);
     cells_.enter()

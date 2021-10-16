@@ -15,9 +15,9 @@
       <a href="index.html">back</a> | 
       lista de projetos
       <div class="d-flex flex-wrap" id="projects-container">
-        projects: <select class="form-select" aria-label="Default select example" id="projects-list"></select>
+        <!-- projects: <select class="form-select" aria-label="Default select example" id="projects-list"></select>
         maps: <select class="form-select" aria-label="Default select example" id="missions-list"></select>
-        kits: <select class="form-select" aria-label="Default select example" id="kits-list"></select>
+        kits: <select class="form-select" aria-label="Default select example" id="kits-list"></select> -->
         <!--Insert a button to call the buildTable() function-->
         <!-- <button type="button" class="btn btn-primary" onclick="buildTable()">Build Table</button> -->
         <table id="my-table" class="table table-striped">
@@ -40,11 +40,13 @@
         window.alert("Authentication failed: No access token");
       } else {
         console.log(access_token);
-        initializeProjectList(access_token);
+        // initializeProjectList(access_token);
         getUser(access_token).then(user => {
           // Set localStorage
           localStorage.setItem("user_id", user.id);
         });
+        let doPitch_mission_id = "616828b5c435b002781956b2";
+        getAllKits_doPitch(doPitch_mission_id);
       }
     </script>
   </body>
