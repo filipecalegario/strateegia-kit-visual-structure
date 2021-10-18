@@ -2,7 +2,7 @@ let users = [];
 let questions = [];
 let preRows = [];
 let postRows = [];
-
+let groupedRows = [];
 
 let questions_doPitch = [];
 
@@ -52,7 +52,7 @@ function buildComments_doPitch() {
                     "author_id": comment.author.id,
                     "author": comment.author.name,
                     "comment": comment.text,
-                    "kit": question_text.kit
+                    "kit": question.kit
                 };
                 //row[question_text] = comment.text;
                 if (row.author_id == user_id) {
@@ -80,6 +80,24 @@ function buildComments_doPitch() {
                 postRows.push(newLocal);
             } else {
                 currentD[row.question] = row.comment;
+            }
+        });
+        console.log("postRows:");
+        console.log(postRows);
+        postRows.forEach(pRow => {
+            let currentD = preRows.find(d => d.id == pRow.id);
+            let kit = currentD.kit;
+            // Group the row by kit and store it in groupedRows
+            let currentGroup = groupedRows.find(d => d.kit == kit);
+            if (currentGroup == undefined) {
+                const newLocal = {
+                    "kit": kit,
+                    "questions": []
+                };
+                newLocal.questions.push(pRow);
+                groupedRows.push(newLocal);
+            } else {
+                currentGroup.questions.push(pRow);
             }
         });
 
